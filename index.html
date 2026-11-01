@@ -2,89 +2,168 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>QUEEN MUSIC VIDEO STUDIO</title>
-  <style>
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      min-height: 100vh;
-      font-family: Arial, sans-serif;
-      color: #fff2de;
-      background: linear-gradient(135deg, #160d19, #49213f, #155e63);
-      display: grid;
-      place-items: center;
-      padding: 24px;
-    }
-    .studio {
-      width: 100%;
-      max-width: 650px;
-      padding: 35px;
-      border: 1px solid #c9828b;
-      border-radius: 22px;
-      background: rgba(20, 12, 25, .88);
-      box-shadow: 0 15px 50px #0008;
-    }
-    h1 { color: #e5a1aa; text-align: center; }
-    .subtitle { text-align: center; color: #ddd; }
-    label { display: block; margin: 22px 0 9px; }
-    input {
-      width: 100%;
-      padding: 13px;
-      border-radius: 10px;
-      border: 1px solid #c9828b;
-      background: #261a2b;
-      color: white;
-    }
-    button {
-      width: 100%;
-      margin-top: 25px;
-      padding: 15px;
-      border: 0;
-      border-radius: 10px;
-      background: #c9828b;
-      color: #211321;
-      font-size: 16px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-    #status { margin-top: 18px; text-align: center; }
-    .note { color: #cfc4ce; font-size: 13px; line-height: 1.5; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QUEEN MUSIC VIDEO STUDIO</title>
+<style>
+*{box-sizing:border-box}
+body{
+ margin:0;padding:25px;font-family:Arial,sans-serif;color:#fff2de;
+ background:linear-gradient(135deg,#160d19,#49213f,#155e63);
+}
+main{max-width:850px;margin:auto}
+.studio{
+ background:#1b1220ed;padding:28px;border:1px solid #c9828b;
+ border-radius:20px;box-shadow:0 12px 40px #0008;
+}
+h1{text-align:center;color:#e5a1aa}
+.subtitle{text-align:center;color:#ddd}
+label{display:block;margin:22px 0 9px;font-weight:bold}
+input{
+ width:100%;padding:13px;border-radius:9px;
+ border:1px solid #c9828b;background:#261a2b;color:white
+}
+button{
+ border:0;border-radius:9px;padding:13px 18px;
+ background:#c9828b;color:#211321;font-weight:bold;cursor:pointer;
+}
+button:hover{opacity:.85}
+.primary{width:100%;margin-top:22px;font-size:16px}
+.preview{max-width:220px;max-height:250px;display:none;margin:15px auto;border-radius:12px}
+audio{width:100%;margin-top:15px;display:none}
+#status{margin-top:20px;text-align:center;color:#e5a1aa}
+.scene{
+ margin-top:15px;padding:18px;border:1px solid #76506e;
+ border-radius:12px;background:#2a1c30;
+}
+.scene h3{margin-top:0;color:#e5a1aa}
+.prompt{white-space:pre-wrap;line-height:1.5;color:#eee}
+.small{font-size:13px;color:#cfc4ce;line-height:1.5}
+#results{margin-top:25px}
+</style>
 </head>
 <body>
-  <main class="studio">
-    <h1>QUEEN MUSIC VIDEO STUDIO</h1>
-    <p class="subtitle">Tu música. Tu cantante. Tu videoclip.</p>
+<main>
+<section class="studio">
+<h1>👑 QUEEN MUSIC VIDEO STUDIO</h1>
+<p class="subtitle">Tu música. Tu cantante. Tu videoclip.</p>
 
-    <label for="song">🎵 Sube tu canción (MP3 o WAV)</label>
-    <input id="song" type="file" accept="audio/mpeg,audio/wav,audio/*">
+<label for="song">🎵 Sube tu canción (MP3 o WAV)</label>
+<input id="song" type="file" accept="audio/*">
+<audio id="player" controls></audio>
 
-    <label for="cover">👑 Sube la imagen de tu cantante</label>
-    <input id="cover" type="file" accept="image/*">
+<label for="cover">👑 Imagen de nuestra cantante</label>
+<input id="cover" type="file" accept="image/*">
+<img id="preview" class="preview" alt="Imagen de la cantante">
 
-    <button id="start">PREPARAR MI VIDEOCLIP</button>
+<button class="primary" id="analyze">🎬 ANALIZAR MI CANCIÓN</button>
+<p id="status">Esperando tus archivos...</p>
 
-    <p id="status">Esperando tus archivos...</p>
-    <p class="note">
-      Próximamente: escenas automáticas, conexión con motores de
-      vídeo IA y exportación de tu videoclip completo.
-    </p>
-  </main>
+<div id="results"></div>
 
-  <script>
-    const song = document.getElementById("song");
-    const cover = document.getElementById("cover");
-    const status = document.getElementById("status");
+<p class="small">
+Versión inicial: análisis de duración y planificación de escenas.
+La generación de vídeo se conectará en una siguiente etapa.
+</p>
+</section>
+</main>
 
-    document.getElementById("start").addEventListener("click", () => {
-      if (!song.files.length || !cover.files.length) {
-        status.textContent = "Primero sube tu canción y la imagen de tu cantante.";
-        return;
-      }
-      status.textContent = "¡Archivos cargados! La conexión con los motores de vídeo IA será nuestro siguiente paso.";
-    });
-  </script>
+<script>
+const song = document.getElementById("song");
+const cover = document.getElementById("cover");
+const player = document.getElementById("player");
+const preview = document.getElementById("preview");
+const status = document.getElementById("status");
+const results = document.getElementById("results");
+
+let songURL = null;
+let imageURL = null;
+
+function formatTime(seconds){
+ const m = Math.floor(seconds / 60);
+ const s = Math.floor(seconds % 60);
+ return `${m}:${String(s).padStart(2,"0")}`;
+}
+
+song.addEventListener("change",()=>{
+ if(songURL) URL.revokeObjectURL(songURL);
+ if(!song.files.length) return;
+ songURL = URL.createObjectURL(song.files[0]);
+ player.src = songURL;
+ player.style.display = "block";
+ status.textContent = "Canción cargada. Preparada para analizar.";
+ results.innerHTML = "";
+});
+
+cover.addEventListener("change",()=>{
+ if(imageURL) URL.revokeObjectURL(imageURL);
+ if(!cover.files.length) return;
+ imageURL = URL.createObjectURL(cover.files[0]);
+ preview.src = imageURL;
+ preview.style.display = "block";
+});
+
+document.getElementById("analyze").addEventListener("click",()=>{
+ if(!song.files.length || !cover.files.length){
+  status.textContent = "Primero sube tu canción y la imagen de la cantante.";
+  return;
+ }
+
+ if(!Number.isFinite(player.duration) || player.duration <= 0){
+  status.textContent = "No se pudo leer la duración. Comprueba el archivo de audio.";
+  return;
+ }
+
+ const duration = player.duration;
+ const sceneLength = 8;
+ const totalScenes = Math.ceil(duration / sceneLength);
+
+ status.textContent = `¡Análisis listo! Duración: ${formatTime(duration)}.`;
+ results.innerHTML = `
+  <h2>🎵 Análisis de tu canción</h2>
+  <p>Duración: <strong>${formatTime(duration)}</strong></p>
+  <p>Escenas estimadas: <strong>${totalScenes}</strong></p>
+  <p class="small">Cada escena tendrá hasta 8 segundos. La última puede ser más corta.</p>
+  <h2>🎬 Plan de escenas</h2>
+ `;
+
+ for(let i=0;i<totalScenes;i++){
+  const start = i * sceneLength;
+  const end = Math.min(start + sceneLength,duration);
+  const prompt =
+`Videoclip musical cinematográfico, formato vertical 9:16.
+Usar la imagen de referencia como la misma cantante protagonista.
+Conservar exactamente su rostro, cabello borgoña oscuro y apariencia.
+Escena ${i+1} de ${totalScenes}.
+Duración: ${Math.ceil(end-start)} segundos.
+Tiempo de la canción: ${formatTime(start)} a ${formatTime(end)}.
+Acción: la cantante interpreta una canción soul blues con emoción,
+mirada expresiva y movimientos naturales. Ambiente elegante,
+iluminación cinematográfica, cámara fluida y estética de videoclip profesional.
+No cambiar su identidad, no deformar manos ni rostro.
+Sin textos, subtítulos ni personajes adicionales.`;
+
+  const card = document.createElement("div");
+  card.className = "scene";
+  card.innerHTML = `
+   <h3>Escena ${i+1}</h3>
+   <p>⏱️ ${formatTime(start)} – ${formatTime(end)}</p>
+   <p class="prompt"></p>
+   <button type="button">Copiar prompt</button>
+  `;
+  card.querySelector(".prompt").textContent = prompt;
+  card.querySelector("button").addEventListener("click",async()=>{
+   try{
+    await navigator.clipboard.writeText(prompt);
+    status.textContent = `Prompt de la escena ${i+1} copiado.`;
+   }catch(e){
+    status.textContent = "No se pudo copiar. Selecciona y copia el texto manualmente.";
+   }
+  });
+  results.appendChild(card);
+ }
+});
+</script>
 </body>
+</html>
 </html>
