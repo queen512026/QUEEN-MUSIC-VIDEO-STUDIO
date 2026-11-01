@@ -130,18 +130,50 @@ document.getElementById("analyze").addEventListener("click",()=>{
  for(let i=0;i<totalScenes;i++){
   const start = i * sceneLength;
   const end = Math.min(start + sceneLength,duration);
-  const prompt =
+  
+const visualScenes = [
+"Primer plano de la cantante mirando por una ventana bajo la lluvia. Expresión melancólica, habitación elegante y luz tenue.",
+"La cantante sentada junto a una ventana, mirando al horizonte, con una lágrima discreta y ambiente íntimo.",
+"La cantante camina lentamente por un pasillo oscuro, iluminado por pequeñas luces cálidas.",
+"Frente a un espejo, la cantante observa su reflejo con expresión pensativa. Cámara lenta.",
+"La cantante sostiene una fotografía antigua y la contempla con nostalgia.",
+"Primer plano de sus ojos, respira profundamente y comienza a recuperar la seguridad.",
+"La cantante deja una fotografía sobre una mesa y se aleja sin mirar atrás.",
+"Camina hacia una puerta abierta por donde entra una intensa luz dorada.",
+"La cantante aparece en una habitación amplia, con cortinas movidas por el viento.",
+"Se acerca a la cámara con una mirada firme y decidida.",
+"La cantante canta con emoción frente a un micrófono antiguo, iluminación soul blues.",
+"Plano lateral de la cantante interpretando la canción con fuerza y sentimiento.",
+"Se mueve lentamente bajo una luz cálida, cabello borgoña ondeando suavemente.",
+"Primer plano de su rostro mientras canta con intensidad emocional.",
+"La cantante levanta la mirada y sonríe con seguridad por primera vez.",
+"Actuación poderosa frente al micrófono, luces teatrales y ambiente cinematográfico.",
+"La cantante camina por un escenario iluminado con luces doradas.",
+"Plano general de la cantante en un escenario elegante, interpretando con pasión.",
+"La cámara gira lentamente alrededor de ella mientras canta.",
+"La cantante extiende los brazos y disfruta de su libertad.",
+"Escena exterior al amanecer, la cantante camina por un jardín lleno de luz.",
+"Primer plano de una sonrisa tranquila y segura.",
+"La cantante baila suavemente, mostrando alegría y confianza.",
+"Interpretación intensa frente a cámara, con iluminación dramática.",
+"La cantante mira al horizonte desde una terraza al atardecer.",
+"Plano cinematográfico de su cabello borgoña moviéndose con el viento.",
+"La cantante vuelve al escenario y canta con fuerza y orgullo.",
+"Plano final: la cantante mira directamente a cámara, sonríe y permanece bajo una hermosa luz dorada."
+];
+
+const prompt =
 `Videoclip musical cinematográfico, formato vertical 9:16.
 Usar la imagen de referencia como la misma cantante protagonista.
 Conservar exactamente su rostro, cabello borgoña oscuro y apariencia.
 Escena ${i+1} de ${totalScenes}.
 Duración: ${Math.ceil(end-start)} segundos.
 Tiempo de la canción: ${formatTime(start)} a ${formatTime(end)}.
-Acción: la cantante interpreta una canción soul blues con emoción,
-mirada expresiva y movimientos naturales. Ambiente elegante,
-iluminación cinematográfica, cámara fluida y estética de videoclip profesional.
-No cambiar su identidad, no deformar manos ni rostro.
-Sin textos, subtítulos ni personajes adicionales.`;
+Acción visual: ${visualScenes[i % visualScenes.length]}
+Estética soul blues cinematográfica, iluminación profesional,
+movimientos naturales y cámara fluida.
+Mantener continuidad visual y la misma identidad de la cantante.
+No deformar rostro ni manos. Sin textos, subtítulos ni personajes adicionales.`;
 
   const card = document.createElement("div");
   card.className = "scene";
@@ -165,5 +197,4 @@ Sin textos, subtítulos ni personajes adicionales.`;
 });
 </script>
 </body>
-</html>
 </html>
