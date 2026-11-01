@@ -29,7 +29,10 @@ button{
 }
 button:hover{opacity:.85}
 .primary{width:100%;margin-top:22px;font-size:16px}
-.preview{max-width:220px;max-height:250px;display:none;margin:15px auto;border-radius:12px}
+.preview{
+ max-width:220px;max-height:250px;display:none;
+ margin:15px auto;border-radius:12px
+}
 audio{width:100%;margin-top:15px;display:none}
 #status{margin-top:20px;text-align:center;color:#e5a1aa}
 .scene{
@@ -37,7 +40,7 @@ audio{width:100%;margin-top:15px;display:none}
  border-radius:12px;background:#2a1c30;
 }
 .scene h3{margin-top:0;color:#e5a1aa}
-.prompt{white-space:pre-wrap;line-height:1.5;color:#eee}
+.prompt{white-space:pre-wrap;line-height:1.6;color:#eee}
 .small{font-size:13px;color:#cfc4ce;line-height:1.5}
 #results{margin-top:25px}
 </style>
@@ -56,14 +59,15 @@ audio{width:100%;margin-top:15px;display:none}
 <input id="cover" type="file" accept="image/*">
 <img id="preview" class="preview" alt="Imagen de la cantante">
 
-<button class="primary" id="analyze">🎬 ANALIZAR MI CANCIÓN</button>
+<button class="primary" id="analyze">🎬 CREAR PLAN DE ESCENAS</button>
 <p id="status">Esperando tus archivos...</p>
 
 <div id="results"></div>
 
 <p class="small">
-Versión inicial: análisis de duración y planificación de escenas.
-La generación de vídeo se conectará en una siguiente etapa.
+Esta herramienta divide tu canción en escenas de hasta 8 segundos
+y prepara prompts individuales. La generación de vídeo se conectará
+en una siguiente etapa.
 </p>
 </section>
 </main>
@@ -88,20 +92,167 @@ function formatTime(seconds){
 song.addEventListener("change",()=>{
  if(songURL) URL.revokeObjectURL(songURL);
  if(!song.files.length) return;
+
  songURL = URL.createObjectURL(song.files[0]);
  player.src = songURL;
  player.style.display = "block";
- status.textContent = "Canción cargada. Preparada para analizar.";
  results.innerHTML = "";
+ status.textContent = "Canción cargada. Esperando la imagen de la cantante.";
 });
 
 cover.addEventListener("change",()=>{
  if(imageURL) URL.revokeObjectURL(imageURL);
  if(!cover.files.length) return;
+
  imageURL = URL.createObjectURL(cover.files[0]);
  preview.src = imageURL;
  preview.style.display = "block";
+ status.textContent = "Imagen cargada. ¡Ya podemos crear el videoclip!";
 });
+
+// Las escenas se definen una sola vez.
+const visualScenes = [
+{
+ title:"La soledad",
+ action:"La cantante permanece de pie junto a una ventana mientras observa la lluvia caer. Su expresión refleja tristeza y soledad.",
+ camera:"Primer plano lento que se acerca suavemente a su rostro."
+},
+{
+ title:"Pensamientos",
+ action:"Sentada junto a la ventana, la cantante baja la mirada y respira profundamente, perdida en sus pensamientos.",
+ camera:"Plano medio lateral con un acercamiento lento."
+},
+{
+ title:"Un recuerdo",
+ action:"La cantante sostiene una fotografía antigua entre sus manos y la contempla con nostalgia.",
+ camera:"Primer plano de la fotografía y transición hacia su rostro."
+},
+{
+ title:"Las lágrimas",
+ action:"Una lágrima recorre suavemente su mejilla mientras mira hacia el exterior.",
+ camera:"Primerísimo primer plano de sus ojos y rostro."
+},
+{
+ title:"El espejo",
+ action:"Frente a un espejo elegante, la cantante observa su reflejo como si estuviera buscando respuestas.",
+ camera:"Cámara detrás de su hombro mostrando el reflejo."
+},
+{
+ title:"El pasado",
+ action:"La cantante camina lentamente por un pasillo oscuro iluminado por pequeñas luces cálidas.",
+ camera:"Travelling hacia atrás mientras ella avanza."
+},
+{
+ title:"La decisión",
+ action:"Deja la fotografía sobre una mesa, se endereza y mira hacia adelante con determinación.",
+ camera:"Plano detalle de sus manos y luego ascenso hacia su rostro."
+},
+{
+ title:"Dejar atrás",
+ action:"La cantante camina alejándose de una habitación oscura sin volver la mirada.",
+ camera:"Plano general desde atrás con seguimiento suave."
+},
+{
+ title:"La luz",
+ action:"Abre una gran puerta y la luz dorada del amanecer ilumina su rostro.",
+ camera:"Contraluz cinematográfico con cámara avanzando lentamente."
+},
+{
+ title:"Un nuevo comienzo",
+ action:"Camina por una habitación luminosa con cortinas movidas suavemente por el viento.",
+ camera:"Travelling lateral mostrando el movimiento del cabello."
+},
+{
+ title:"Recuperar la voz",
+ action:"La cantante se coloca frente a un micrófono antiguo y comienza a interpretar la canción con emoción.",
+ camera:"Plano medio con acercamiento lento al micrófono."
+},
+{
+ title:"Fuerza interior",
+ action:"Canta con intensidad y sentimiento, transmitiendo una mezcla de dolor y valentía.",
+ camera:"Primer plano frontal con movimiento suave de cámara."
+},
+{
+ title:"La transformación",
+ action:"La cantante levanta la cabeza y su expresión cambia de tristeza a seguridad.",
+ camera:"Cámara asciende lentamente desde el pecho hasta el rostro."
+},
+{
+ title:"Sin miedo",
+ action:"Interpreta la canción con los ojos llenos de emoción y una mirada firme.",
+ camera:"Primer plano cinematográfico con ligero movimiento circular."
+},
+{
+ title:"La sonrisa",
+ action:"La cantante sonríe suavemente mientras continúa cantando, mostrando tranquilidad y confianza.",
+ camera:"Acercamiento lento al rostro."
+},
+{
+ title:"La reina del escenario",
+ action:"Aparece en un escenario elegante rodeada de luces doradas y canta con fuerza.",
+ camera:"Plano general que avanza hacia ella."
+},
+{
+ title:"Libertad",
+ action:"Extiende los brazos y disfruta del momento mientras su cabello se mueve con el viento.",
+ camera:"Travelling circular alrededor de su cuerpo."
+},
+{
+ title:"El poder de elegir",
+ action:"La cantante camina con seguridad por el escenario mientras interpreta la canción.",
+ camera:"Seguimiento frontal con movimiento fluido."
+},
+{
+ title:"Renacer",
+ action:"Cierra los ojos un instante, respira profundamente y vuelve a cantar con una expresión serena.",
+ camera:"Primer plano con acercamiento muy suave."
+},
+{
+ title:"Alegría",
+ action:"La cantante realiza movimientos de baile elegantes y naturales, disfrutando de su libertad.",
+ camera:"Plano medio con travelling lateral."
+},
+{
+ title:"Un nuevo horizonte",
+ action:"Camina por un jardín al amanecer rodeada de luz cálida y flores en movimiento.",
+ camera:"Plano general que la sigue desde atrás."
+},
+{
+ title:"Seguridad",
+ action:"Se detiene, mira al horizonte y sonríe con una expresión de paz interior.",
+ camera:"Plano medio que se transforma lentamente en primer plano."
+},
+{
+ title:"La gran interpretación",
+ action:"Canta frente al micrófono con una interpretación poderosa, emotiva y llena de personalidad.",
+ camera:"Movimiento lento de acercamiento desde un plano medio."
+},
+{
+ title:"Brillar",
+ action:"La cantante aparece bajo luces teatrales doradas, con una presencia elegante y segura.",
+ camera:"Cámara gira suavemente alrededor de ella."
+},
+{
+ title:"La mujer que soy",
+ action:"Mira directamente hacia la cámara con orgullo y serenidad mientras continúa cantando.",
+ camera:"Primer plano frontal estable con pequeño acercamiento."
+},
+{
+ title:"Sin mirar atrás",
+ action:"Camina hacia una terraza iluminada por el atardecer, con el cabello moviéndose suavemente.",
+ camera:"Travelling posterior que revela el paisaje."
+},
+{
+ title:"Mi propia luz",
+ action:"La cantante se gira hacia la cámara y sonríe con seguridad bajo una luz dorada.",
+ camera:"Cámara realiza un movimiento semicircular suave."
+},
+{
+ title:"El final",
+ action:"Permanece en el escenario, mira directamente a cámara y termina con una sonrisa poderosa y serena.",
+ camera:"Primer plano final que se aleja lentamente hasta mostrar el escenario."
+}
+];
 
 document.getElementById("analyze").addEventListener("click",()=>{
  if(!song.files.length || !cover.files.length){
@@ -110,7 +261,7 @@ document.getElementById("analyze").addEventListener("click",()=>{
  }
 
  if(!Number.isFinite(player.duration) || player.duration <= 0){
-  status.textContent = "No se pudo leer la duración. Comprueba el archivo de audio.";
+  status.textContent = "Espera a que el reproductor termine de cargar la duración de la canción.";
   return;
  }
 
@@ -118,83 +269,87 @@ document.getElementById("analyze").addEventListener("click",()=>{
  const sceneLength = 8;
  const totalScenes = Math.ceil(duration / sceneLength);
 
- status.textContent = `¡Análisis listo! Duración: ${formatTime(duration)}.`;
+ status.textContent = `¡Plan listo! ${totalScenes} escenas preparadas.`;
+
  results.innerHTML = `
   <h2>🎵 Análisis de tu canción</h2>
   <p>Duración: <strong>${formatTime(duration)}</strong></p>
-  <p>Escenas estimadas: <strong>${totalScenes}</strong></p>
-  <p class="small">Cada escena tendrá hasta 8 segundos. La última puede ser más corta.</p>
-  <h2>🎬 Plan de escenas</h2>
+  <p>Escenas: <strong>${totalScenes}</strong></p>
+  <p class="small">Cada escena tiene hasta 8 segundos. Las escenas se suceden siguiendo una historia visual.</p>
+  <h2>🎬 Tu historia musical</h2>
  `;
 
  for(let i=0;i<totalScenes;i++){
   const start = i * sceneLength;
   const end = Math.min(start + sceneLength,duration);
-  
-const visualScenes = [
-"Primer plano de la cantante mirando por una ventana bajo la lluvia. Expresión melancólica, habitación elegante y luz tenue.",
-"La cantante sentada junto a una ventana, mirando al horizonte, con una lágrima discreta y ambiente íntimo.",
-"La cantante camina lentamente por un pasillo oscuro, iluminado por pequeñas luces cálidas.",
-"Frente a un espejo, la cantante observa su reflejo con expresión pensativa. Cámara lenta.",
-"La cantante sostiene una fotografía antigua y la contempla con nostalgia.",
-"Primer plano de sus ojos, respira profundamente y comienza a recuperar la seguridad.",
-"La cantante deja una fotografía sobre una mesa y se aleja sin mirar atrás.",
-"Camina hacia una puerta abierta por donde entra una intensa luz dorada.",
-"La cantante aparece en una habitación amplia, con cortinas movidas por el viento.",
-"Se acerca a la cámara con una mirada firme y decidida.",
-"La cantante canta con emoción frente a un micrófono antiguo, iluminación soul blues.",
-"Plano lateral de la cantante interpretando la canción con fuerza y sentimiento.",
-"Se mueve lentamente bajo una luz cálida, cabello borgoña ondeando suavemente.",
-"Primer plano de su rostro mientras canta con intensidad emocional.",
-"La cantante levanta la mirada y sonríe con seguridad por primera vez.",
-"Actuación poderosa frente al micrófono, luces teatrales y ambiente cinematográfico.",
-"La cantante camina por un escenario iluminado con luces doradas.",
-"Plano general de la cantante en un escenario elegante, interpretando con pasión.",
-"La cámara gira lentamente alrededor de ella mientras canta.",
-"La cantante extiende los brazos y disfruta de su libertad.",
-"Escena exterior al amanecer, la cantante camina por un jardín lleno de luz.",
-"Primer plano de una sonrisa tranquila y segura.",
-"La cantante baila suavemente, mostrando alegría y confianza.",
-"Interpretación intensa frente a cámara, con iluminación dramática.",
-"La cantante mira al horizonte desde una terraza al atardecer.",
-"Plano cinematográfico de su cabello borgoña moviéndose con el viento.",
-"La cantante vuelve al escenario y canta con fuerza y orgullo.",
-"Plano final: la cantante mira directamente a cámara, sonríe y permanece bajo una hermosa luz dorada."
-];
+  const scene = visualScenes[i % visualScenes.length];
 
-const prompt =
-`Videoclip musical cinematográfico, formato vertical 9:16.
-Usar la imagen de referencia como la misma cantante protagonista.
-Conservar exactamente su rostro, cabello borgoña oscuro y apariencia.
-Escena ${i+1} de ${totalScenes}.
-Duración: ${Math.ceil(end-start)} segundos.
-Tiempo de la canción: ${formatTime(start)} a ${formatTime(end)}.
-Acción visual: ${visualScenes[i % visualScenes.length]}
-Estética soul blues cinematográfica, iluminación profesional,
-movimientos naturales y cámara fluida.
-Mantener continuidad visual y la misma identidad de la cantante.
-No deformar rostro ni manos. Sin textos, subtítulos ni personajes adicionales.`;
+  const prompt =
+`VIDECLIP MUSICAL CINEMATOGRÁFICO — ESCENA ${i+1}
+
+FORMATO: Vertical 9:16.
+DURACIÓN: ${Math.ceil(end-start)} segundos.
+FRAGMENTO MUSICAL: ${formatTime(start)} a ${formatTime(end)}.
+
+PERSONAJE:
+Usar la imagen de referencia como la cantante protagonista.
+Conservar exactamente su identidad, rostro, rasgos, cabello largo borgoña oscuro y vestuario de referencia. No rediseñar ni cambiar su apariencia.
+
+ACCIÓN DE ESTA ESCENA:
+${scene.action}
+
+MOVIMIENTO DE CÁMARA:
+${scene.camera}
+
+ESTILO:
+Cinematografía profesional, estética soul blues, iluminación elegante y emocional, tonos cálidos y atmósfera dramática. Movimiento corporal natural y expresivo.
+
+CONTINUIDAD:
+Mantener a la misma cantante durante todo el videoclip. Respetar la apariencia de la imagen de referencia y la continuidad de la historia.
+
+EVITAR:
+Rostros deformados, manos deformes, dedos adicionales, cambios de identidad, personajes adicionales, textos, subtítulos, logos o diálogos hablados. La cantante interpreta la canción sin añadir voces ni frases ajenas.`;
 
   const card = document.createElement("div");
   card.className = "scene";
-  card.innerHTML = `
-   <h3>Escena ${i+1}</h3>
-   <p>⏱️ ${formatTime(start)} – ${formatTime(end)}</p>
-   <p class="prompt"></p>
-   <button type="button">Copiar prompt</button>
-  `;
-  card.querySelector(".prompt").textContent = prompt;
-  card.querySelector("button").addEventListener("click",async()=>{
+
+  const heading = document.createElement("h3");
+  heading.textContent = `Escena ${i+1}: ${scene.title}`;
+
+  const time = document.createElement("p");
+  time.textContent = `⏱️ ${formatTime(start)} – ${formatTime(end)}`;
+
+  const promptText = document.createElement("p");
+  promptText.className = "prompt";
+  promptText.textContent = prompt;
+
+  const button = document.createElement("button");
+  button.type = "button";
+  button.textContent = "📋 Copiar prompt";
+
+  button.addEventListener("click",async()=>{
    try{
     await navigator.clipboard.writeText(prompt);
-    status.textContent = `Prompt de la escena ${i+1} copiado.`;
+    status.textContent = `¡Escena ${i+1} copiada!`;
    }catch(e){
-    status.textContent = "No se pudo copiar. Selecciona y copia el texto manualmente.";
+    const area = document.createElement("textarea");
+    area.value = prompt;
+    document.body.appendChild(area);
+    area.select();
+    document.execCommand("copy");
+    area.remove();
+    status.textContent = `¡Escena ${i+1} copiada!`;
    }
   });
+
+  card.appendChild(heading);
+  card.appendChild(time);
+  card.appendChild(promptText);
+  card.appendChild(button);
   results.appendChild(card);
  }
 });
 </script>
 </body>
 </html>
+
